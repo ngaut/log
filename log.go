@@ -100,6 +100,14 @@ func Debugf(format string, v ...interface{}) {
 	_log.Debugf(format, v...)
 }
 
+func Warn(v ...interface{}) {
+	_log.Warning(v...)
+}
+
+func Warnf(format string, v ...interface{}) {
+	_log.Warningf(format, v...)
+}
+
 func Warning(v ...interface{}) {
 	_log.Warning(v...)
 }
