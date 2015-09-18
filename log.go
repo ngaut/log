@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"runtime"
 	"sync"
 	"time"
 )
@@ -49,6 +50,7 @@ var _log *logger = New()
 
 func init() {
 	SetFlags(Ldate | Ltime | Lshortfile)
+	SetHighlighting(runtime.GOOS != "windows")
 }
 
 func Logger() *log.Logger {
