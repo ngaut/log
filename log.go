@@ -46,14 +46,14 @@ const (
 const FORMAT_TIME_DAY string = "20060102"
 const FORMAT_TIME_HOUR string = "2006010215"
 
-var _log *logger = New()
+var _log *Logger = New()
 
 func init() {
 	SetFlags(Ldate | Ltime | Lshortfile)
 	SetHighlighting(runtime.GOOS != "windows")
 }
 
-func Logger() *log.Logger {
+func StdLogger() *log.Logger {
 	return _log._log
 }
 
@@ -140,7 +140,7 @@ func SetRotateByHour() {
 	_log.SetRotateByHour()
 }
 
-type logger struct {
+type Logger struct {
 	_log         *log.Logger
 	level        LogLevel
 	highlighting bool
@@ -155,29 +155,29 @@ type logger struct {
 	lock sync.Mutex
 }
 
-func (l *logger) SetHighlighting(highlighting bool) {
+func (l *Logger) SetHighlighting(highlighting bool) {
 	l.highlighting = highlighting
 }
 
-func (l *logger) SetLevel(level LogLevel) {
+func (l *Logger) SetLevel(level LogLevel) {
 	l.level = level
 }
 
-func (l *logger) SetLevelByString(level string) {
+func (l *Logger) SetLevelByString(level string) {
 	l.level = StringToLogLevel(level)
 }
 
-func (l *logger) SetRotateByDay() {
+func (l *Logger) SetRotateByDay() {
 	l.dailyRolling = true
 	l.logSuffix = genDayTime(time.Now())
 }
 
-func (l *logger) SetRotateByHour() {
+func (l *Logger) SetRotateByHour() {
 	l.hourRolling = true
 	l.logSuffix = genHourTime(time.Now())
 }
 
-func (l *logger) rotate() error {
+func (l *Logger) rotate() error {
 	l.lock.Lock()
 	defer l.lock.Unlock()
 
@@ -201,7 +201,7 @@ func (l *logger) rotate() error {
 	return nil
 }
 
-func (l *logger) doRotate(suffix string) error {
+func (l *Logger) doRotate(suffix string) error {
 	// Notice: Not check error, is this ok?
 	l.fd.Close()
 
@@ -221,11 +221,11 @@ func (l *logger) doRotate(suffix string) error {
 	return nil
 }
 
-func (l *logger) SetOutput(out io.Writer) {
+func (l *Logger) SetOutput(out io.Writer) {
 	l._log = log.New(out, l._log.Prefix(), l._log.Flags())
 }
 
-func (l *logger) SetOutputByName(path string) error {
+func (l *Logger) SetOutputByName(path string) error {
 	f, err := os.OpenFile(path, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
 	if err != nil {
 		log.Fatal(err)
@@ -239,7 +239,7 @@ func (l *logger) SetOutputByName(path string) error {
 	return err
 }
 
-func (l *logger) log(t LogType, v ...interface{}) {
+func (l *Logger) log(t LogType, v ...interface{}) {
 	if l.level|LogLevel(t) != l.level {
 		return
 	}
@@ -266,7 +266,7 @@ func (l *logger) log(t LogType, v ...interface{}) {
 	l._log.Output(4, s)
 }
 
-func (l *logger) logf(t LogType, format string, v ...interface{}) {
+func (l *Logger) logf(t LogType, format string, v ...interface{}) {
 	if l.level|LogLevel(t) != l.level {
 		return
 	}
@@ -287,45 +287,45 @@ func (l *logger) logf(t LogType, format string, v ...interface{}) {
 	l._log.Output(4, s)
 }
 
-func (l *logger) Fatal(v ...interface{}) {
+func (l *Logger) Fatal(v ...interface{}) {
 	l.log(LOG_FATAL, v...)
 	os.Exit(-1)
 }
 
-func (l *logger) Fatalf(format string, v ...interface{}) {
+func (l *Logger) Fatalf(format string, v ...interface{}) {
 	l.logf(LOG_FATAL, format, v...)
 	os.Exit(-1)
 }
 
-func (l *logger) Error(v ...interface{}) {
+func (l *Logger) Error(v ...interface{}) {
 	l.log(LOG_ERROR, v...)
 }
 
-func (l *logger) Errorf(format string, v ...interface{}) {
+func (l *Logger) Errorf(format string, v ...interface{}) {
 	l.logf(LOG_ERROR, format, v...)
 }
 
-func (l *logger) Warning(v ...interface{}) {
+func (l *Logger) Warning(v ...interface{}) {
 	l.log(LOG_WARNING, v...)
 }
 
-func (l *logger) Warningf(format string, v ...interface{}) {
+func (l *Logger) Warningf(format string, v ...interface{}) {
 	l.logf(LOG_WARNING, format, v...)
 }
 
-func (l *logger) Debug(v ...interface{}) {
+func (l *Logger) Debug(v ...interface{}) {
 	l.log(LOG_DEBUG, v...)
 }
 
-func (l *logger) Debugf(format string, v ...interface{}) {
+func (l *Logger) Debugf(format string, v ...interface{}) {
 	l.logf(LOG_DEBUG, format, v...)
 }
 
-func (l *logger) Info(v ...interface{}) {
+func (l *Logger) Info(v ...interface{}) {
 	l.log(LOG_INFO, v...)
 }
 
-func (l *logger) Infof(format string, v ...interface{}) {
+func (l *Logger) Infof(format string, v ...interface{}) {
 	l.logf(LOG_INFO, format, v...)
 }
 
@@ -371,10 +371,10 @@ func genHourTime(t time.Time) string {
 	return t.Format(FORMAT_TIME_HOUR)
 }
 
-func New() *logger {
-	return Newlogger(os.Stderr, "")
+func New() *Logger {
+	return NewLogger(os.Stderr, "")
 }
 
-func Newlogger(w io.Writer, prefix string) *logger {
-	return &logger{_log: log.New(w, prefix, LstdFlags), level: LOG_LEVEL_ALL, highlighting: true}
+func NewLogger(w io.Writer, prefix string) *Logger {
+	return &Logger{_log: log.New(w, prefix, LstdFlags), level: LOG_LEVEL_ALL, highlighting: true}
 }
