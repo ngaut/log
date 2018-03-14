@@ -54,7 +54,7 @@ func init() {
 }
 
 func Logger() *log.Logger {
-	return _log._log
+	return _log.Logger()
 }
 
 func SetLevel(level LogLevel) {
@@ -73,7 +73,7 @@ func SetOutputByName(path string) error {
 }
 
 func SetFlags(flags int) {
-	_log._log.SetFlags(flags)
+	_log.SetFlags(flags)
 }
 
 func Info(v ...interface{}) {
@@ -153,6 +153,14 @@ type logger struct {
 	fd        *os.File
 
 	lock sync.Mutex
+}
+
+func (l *logger) SetFlags(flags int) {
+	l._log.SetFlags(flags)
+}
+
+func (l *logger) Logger() *log.Logger {
+	return l._log
 }
 
 func (l *logger) SetHighlighting(highlighting bool) {
