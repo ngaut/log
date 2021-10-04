@@ -80,6 +80,10 @@ func Info(v ...interface{}) {
 	_log.Info(v...)
 }
 
+func I(v ...interface{}) {
+	_log.Info(v...)
+}
+
 func Infof(format string, v ...interface{}) {
 	_log.Infof(format, v...)
 }
@@ -88,11 +92,19 @@ func Debug(v ...interface{}) {
 	_log.Debug(v...)
 }
 
+func D(v ...interface{}) {
+	_log.Debug(v...)
+}
+
 func Debugf(format string, v ...interface{}) {
 	_log.Debugf(format, v...)
 }
 
 func Warn(v ...interface{}) {
+	_log.Warning(v...)
+}
+
+func W(v ...interface{}) {
 	_log.Warning(v...)
 }
 
@@ -112,11 +124,19 @@ func Error(v ...interface{}) {
 	_log.Error(v...)
 }
 
+func E(v ...interface{}) {
+	_log.Error(v...)
+}
+
 func Errorf(format string, v ...interface{}) {
 	_log.Errorf(format, v...)
 }
 
 func Fatal(v ...interface{}) {
+	_log.Fatal(v...)
+}
+
+func F(v ...interface{}) {
 	_log.Fatal(v...)
 }
 
@@ -257,11 +277,11 @@ func (l *logger) log(t LogType, v ...interface{}) {
 	v1 := make([]interface{}, len(v)+2)
 	logStr, logColor := LogTypeToString(t)
 	if l.highlighting {
-		v1[0] = "\033" + logColor + "m[" + logStr + "]"
+		v1[0] = "\033" + logColor + "m" + logStr + " |"
 		copy(v1[1:], v)
 		v1[len(v)+1] = "\033[0m"
 	} else {
-		v1[0] = "[" + logStr + "]"
+		v1[0] = logStr + " |"
 		copy(v1[1:], v)
 		v1[len(v)+1] = ""
 	}
@@ -284,9 +304,9 @@ func (l *logger) logf(t LogType, format string, v ...interface{}) {
 	logStr, logColor := LogTypeToString(t)
 	var s string
 	if l.highlighting {
-		s = "\033" + logColor + "m[" + logStr + "] " + fmt.Sprintf(format, v...) + "\033[0m"
+		s = "\033" + logColor + "m" + logStr + " | " + fmt.Sprintf(format, v...) + "\033[0m"
 	} else {
-		s = "[" + logStr + "] " + fmt.Sprintf(format, v...)
+		s = logStr + " | " + fmt.Sprintf(format, v...)
 	}
 	l._log.Output(4, s)
 }
@@ -335,17 +355,17 @@ func (l *logger) Infof(format string, v ...interface{}) {
 
 func StringToLogLevel(level string) LogLevel {
 	switch level {
-	case "fatal":
+	case "fatal", "f":
 		return LOG_LEVEL_FATAL
-	case "error":
+	case "error", "e":
 		return LOG_LEVEL_ERROR
-	case "warn":
+	case "warn", "w":
 		return LOG_LEVEL_WARN
 	case "warning":
 		return LOG_LEVEL_WARN
-	case "debug":
+	case "debug", "d":
 		return LOG_LEVEL_DEBUG
-	case "info":
+	case "info", "i":
 		return LOG_LEVEL_INFO
 	}
 	return LOG_LEVEL_ALL
@@ -354,15 +374,15 @@ func StringToLogLevel(level string) LogLevel {
 func LogTypeToString(t LogType) (string, string) {
 	switch t {
 	case LOG_FATAL:
-		return "fatal", "[0;31"
+		return "F", "[0;31"
 	case LOG_ERROR:
-		return "error", "[0;31"
+		return "E", "[0;31"
 	case LOG_WARNING:
-		return "warning", "[0;33"
+		return "W", "[0;33"
 	case LOG_DEBUG:
-		return "debug", "[0;36"
+		return "D", "[0;36"
 	case LOG_INFO:
-		return "info", "[0;37"
+		return "I", "[0;37"
 	}
 	return "unknown", "[0;37"
 }
@@ -380,5 +400,5 @@ func New() *logger {
 }
 
 func Newlogger(w io.Writer, prefix string) *logger {
-	return &logger{_log: log.New(w, prefix, LstdFlags), level: LOG_LEVEL_ALL, highlighting: true}
+	return &logger{_log: log.New(w, prefix, Lshortfile|Ltime|Ldate), level: LOG_LEVEL_ALL, highlighting: true}
 }
