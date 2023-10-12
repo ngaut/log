@@ -1,4 +1,4 @@
-//high level log wrapper, so it can output different log based on level
+// high level log wrapper, so it can output different log based on level
 package log
 
 import (
@@ -353,6 +353,14 @@ func (l *logger) Infof(format string, v ...interface{}) {
 	l.logf(LOG_INFO, format, v...)
 }
 
+func (l *logger) Println(v ...interface{}) {
+	l.log(LOG_INFO, v...)
+}
+
+func (l *logger) Printf(format string, v ...interface{}) {
+	l.logf(LOG_INFO, format, v...)
+}
+
 func StringToLogLevel(level string) LogLevel {
 	switch level {
 	case "fatal", "f":
@@ -374,15 +382,15 @@ func StringToLogLevel(level string) LogLevel {
 func LogTypeToString(t LogType) (string, string) {
 	switch t {
 	case LOG_FATAL:
-		return "F", "[0;31"
+		return "FATAL", "[0;31"
 	case LOG_ERROR:
-		return "E", "[0;31"
+		return "ERROR", "[0;31"
 	case LOG_WARNING:
-		return "W", "[0;33"
+		return "WARNING", "[0;33"
 	case LOG_DEBUG:
-		return "D", "[0;36"
+		return "DEBUG", "[0;36"
 	case LOG_INFO:
-		return "I", "[0;37"
+		return "INFO", "[0;37"
 	}
 	return "unknown", "[0;37"
 }
